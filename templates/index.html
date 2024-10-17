@@ -1,0 +1,267 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.1/css/all.min.css">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700&display=swap">
+    <title>File Upload with Keyword Extraction</title>
+    <style>
+        body {
+            font-family: 'Montserrat', sans-serif;
+            background-color: #f0f0f0;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+        }
+        .card {
+            background-color: white;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            text-align: center;
+            max-width: 400px;
+            width: 100%;
+        }
+        .app-title {
+            font-size: 24px;
+            color: #333;
+        }
+        .app-subtitle {
+            font-size: 16px;
+            color: #666;
+        }
+        .file-label {
+            display: block;
+            margin: 20px 0;
+            padding: 10px 20px;
+            background-color: #28a745;
+            color: white;
+            cursor: pointer;
+            border-radius: 4px;
+        }
+        .file-label i {
+            margin-right: 10px;
+        }
+        .file-input {
+            display: none;
+        }
+
+        .transcription {
+            margin-top: 20px;
+            font-size: 14px;
+            color: #666;
+            text-align: left;
+        }
+
+        .keywords {
+            margin-top: 10px;
+            font-size: 14px;
+            color: #666;
+            text-align: left;
+        }
+
+        .progress-container {
+            margin-top: 20px;
+            width: 100%;
+            background-color: #e0e0e0;
+            border-radius: 4px;
+            overflow: hidden;
+            display: none;
+        }
+        .progress-bar {
+            width: 0;
+            height: 20px;
+            background-color: #28a745;
+        }
+        .progress-text {
+            margin-top: 10px;
+            font-size: 14px;
+            color: #666;
+        }
+        .file-details {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 20px;
+            display: none;
+        }
+        .file-name {
+            color: #333;
+            font-size: 14px;
+        }
+        .clear-button {
+            background-color: #dc3545;
+            color: white;
+            border: none;
+            padding: 5px 10px;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        .clear-button i {
+            margin-right: 5px;
+        }
+
+        .keywords-container {
+            margin-top: 20px;
+            padding: 10px;
+            background-color: #f8f9fa;
+            border-radius: 5px;
+            display: none;
+        }
+        .keywords-title {
+            font-size: 16px;
+            font-weight: 700;
+            color: #333;
+        }
+        .keywords-list {
+            font-size: 14px;
+            color: #666;
+            text-align: left;
+            margin-top: 10px;
+        }
+        .few-shot-container {
+            margin-top: 20px;
+            padding: 10px;
+            background-color: #f8f9fa;
+            border-radius: 5px;
+            display: block;
+        }
+        .few-shot-title {
+            font-size: 16px;
+            font-weight: 700;
+            color: #333;
+        }
+        .few-shot-examples {
+            margin-top: 10px;
+            font-size: 14px;
+            color: #666;
+            text-align: left;
+        }
+    </style>
+</head>
+<body>
+    <div class="card">
+        <h1 class="app-title">
+            <i class="fas fa-file-upload"></i>
+            Keyword Extractor
+        </h1>
+        <h3 class="app-subtitle">
+            Upload a WAV file for transcription and keyword extraction
+        </h3>
+
+        <label for="fileInput" class="file-label">
+            <i class="fas fa-cloud-upload-alt"></i>
+            Choose a file
+        </label>
+        <input type="file" id="fileInput" class="file-input"/>
+        
+        <!-- Progress Bar -->
+        <div class="progress-container" id="progressContainer">
+            <div class="progress-bar" id="progressBar"></div>
+        </div>
+        <div class="progress-text" id="progressText">Waiting for upload...</div>
+
+        <!-- File Details -->
+        <div class="file-details" id="fileDetails">
+            <div class="file-name" id="fileNameDisplay"></div>
+            <button class="clear-button" id="clearButton">
+                <i class="fas fa-times"></i>Clear
+            </button>
+        </div>
+
+        <div class="keywords-container" id="keywordsContainer">
+            <div class="keywords-title">Extracted Keywords:</div>
+            <div class="keywords-list" id="keywordsList">Loading...</div>
+        </div>
+
+        <div class="few-shot-container" id="fewShotContainer"></div>
+            <div class="few-shot-title">Few-Shot Examples:</div>
+            <div class="few-shot-examples">
+                <strong>Example 1:</strong><br>
+                <em>Input:</em> Lecture on climate change<br>
+                <em>Keywords:</em> climate change, global warming, carbon emissions, sustainability<br><br>
+                
+                <strong>Example 2:</strong><br>
+                <em>Input:</em> Business strategy meeting<br>
+                <em>Keywords:</em> business strategy, market analysis, revenue, sales<br><br>
+                
+                <strong>Example 3:</strong><br>
+                <em>Input:</em> Medical conference discussion<br>
+                <em>Keywords:</em> healthcare, treatment, patients, diagnosis, research
+            </div>
+    </div>
+
+    <script>
+        const fileInput = document.getElementById('fileInput');
+        const progressBar = document.getElementById('progressBar');
+        const progressContainer = document.getElementById('progressContainer');
+        const progressText = document.getElementById('progressText');
+        const fileDetails = document.getElementById('fileDetails');
+        const fileNameDisplay = document.getElementById('fileNameDisplay');
+        const clearButton = document.getElementById('clearButton');
+        const keywordsContainer = document.getElementById('keywordsContainer');
+        const keywordsList = document.getElementById('keywordsList');
+        const fewShotContainer = document.getElementById('fewShotContainer');
+
+        fileInput.addEventListener('change', function() {
+            const file = fileInput.files[0];
+            if (file) {
+                fileNameDisplay.textContent = file.name;
+                fileDetails.style.display = 'flex';
+                progressContainer.style.display = 'block';
+                progressText.textContent = 'Uploading...';
+
+                // Simulate file upload progress
+                let formData = new FormData();
+                formData.append('file', file);
+
+                let xhr = new XMLHttpRequest();
+                xhr.open('POST', '/upload', true);
+
+                xhr.upload.onprogress = function(e) {
+                    if (e.lengthComputable) {
+                        const percentComplete = (e.loaded / e.total) * 100;
+                        progressBar.style.width = percentComplete + '%';
+                        progressText.textContent = `Uploading: ${Math.round(percentComplete)}%`;
+                    }
+                };
+
+                xhr.onload = function() {
+                    if (xhr.status === 200) {
+                        const response = JSON.parse(xhr.responseText);
+                        if (response.error) {
+                            progressText.textContent = response.error;
+                        } else {
+                            progressText.textContent = 'Upload complete';
+                            progressBar.style.width = '100%';
+
+                            // Display extracted keywords
+                            keywordsContainer.style.display = 'block';
+                            const keywords = response.keywords.join(', ');
+                            keywordsList.textContent = keywords;
+                        }
+                    } else {
+                        progressText.textContent = 'Upload failed!';
+                    }
+                };
+
+                xhr.send(formData);
+            }
+        });
+
+        clearButton.addEventListener('click', function() {
+            fileInput.value = '';
+            fileDetails.style.display = 'none';
+            progressBar.style.width = '0%';
+            progressContainer.style.display = 'none';
+            keywordsContainer.style.display = 'none';
+            progressText.textContent = 'Waiting for upload...';
+        });
+    </script>
+</body>
+</html>
